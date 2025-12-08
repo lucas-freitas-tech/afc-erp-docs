@@ -8,29 +8,25 @@ Aqui você encontra toda a documentação funcional e técnica organizada por ve
 
 ## 📂 Estrutura da Documentação
 
-- 🧭 **Roadmap do Produto**  
+- 🧭 [Roadmap do Produto](./product/ROADMAP.md)  
   Direção estratégica, evolução por fases e prioridades de negócio
 
-- 🧩 **Épicos**  
+- 🧩 [Épicos](./product/EPICS.md)  
   As grandes áreas funcionais do ERP
 
-- 📝 **Especificações da Release (Scope)**  
-  Funcionalidades planejadas para cada entrega
-
 - 🧬 **Arquitetura e Decisões Técnicas**  
-Estrutura do sistema, responsabilidades e padrões
+Estrutura geral, padrões e decisões globais (em construção...)
 
-- 🧪 **User Stories + Critérios de Aceitação**  
-  Requisitos funcionais detalhados e validados
-
-- 🔐 **Regras de Negócio e Políticas de Acesso**  
-  Decisões que definem como o sistema opera
-
-- 🔄 **Fluxos de Navegação e Interação**  
-  Comportamento do usuário dentro do produto
+- 📝 [Especificações das Entregas (Specs)](./specs/README.md)  
+  Funcionalidades planejadas para cada entrega
+  - 🧪 User Stories + Critérios de Aceitação
+  - 🔄 Fluxos de Navegação e Interação
+  - 🔐 Regras de Negócio e Políticas (quando aplicável)
+  - 🧬 Arquitetura do Módulo
+  - 📋 Rastreabilidade (épico → spec → histórias)
 
 - 📌 **Histórico de Versionamento**  
-  Como e quando o produto evolui
+  Registro da evolução do produto por releases
 
 ---
 
@@ -75,13 +71,6 @@ após definição da primeira release.
 | `afc-erp-backend` (ainda não foi criado) | API e lógica de negócios |
 | `afc-erp-frontend` (ainda não foi criado) | Interface web do ERP |
 | [afc-erp-docs](./README.md) *(este)* | Documentação do produto |
-
----
-
-## 📬 Contribuições
-
-Melhorias e sugestões são bem-vindas! ✨  
-Siga a organização por **specs**, mantendo consistência nos documentos já existentes.
 
 ---
 
