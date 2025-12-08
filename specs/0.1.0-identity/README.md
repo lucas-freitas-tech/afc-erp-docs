@@ -9,7 +9,7 @@ Módulo de autenticação e controle de acessos (RBAC) do AFC ERP.
 - [Flows](./flows.md)
 
 > ◀ Voltar para:
-> - [Roadmap](../../product/ROADMAP.md)
-> - [Épicos](../../product/EPICS.md)
+>
+> - [Roadmap](../../roadmap/0.1.0/README.md)
+> - [Épicos](../../epics/0.1.0/README.md)
 > - [Lista de Especificações](../README.md)
-
