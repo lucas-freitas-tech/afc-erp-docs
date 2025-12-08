@@ -4,11 +4,11 @@ Este roadmap cobre todas as fases planejadas atualmente, incluindo os sistemas d
 
 ---
 
-## 📌 Fase 1 — Login 1.0 para o ERP
+## 📌 Fase 1 — Login para o ERP
 
 **Objetivo:** Entregar autenticação básica e segura para o ERP.
 
-### Release 1.0 — MVP de Login
+### [Spec 0.1.0 — MVP de Login](../specs/0.1.0-identity/README.md)
 
 - Autenticação com e-mail/senha
 - Controle de sessão e permissões básicas
@@ -25,7 +25,7 @@ Este roadmap cobre todas as fases planejadas atualmente, incluindo os sistemas d
 
 **Objetivo:** Criar o primeiro componente funcional dentro do ERP utilizando a base de login existente.
 
-### Release 2.0 — Criar Orçamentos
+### Spec 1.0.0 — Criar Orçamentos
 
 - Criar orçamento no ERP
 - Listar/visualizar orçamentos
@@ -36,3 +36,5 @@ Este roadmap cobre todas as fases planejadas atualmente, incluindo os sistemas d
 ---
 
 📝 **Documento inicial — será refinado conforme evolução do projeto e aprendizado em cada fase.**
+
+[◀ Voltar para início](../README.md)

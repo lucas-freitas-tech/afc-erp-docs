@@ -1,3 +1,5 @@
+[◀ Voltar para início](../README.md)
+
 # 🧩 Versionamento e Histórico de Releases — AFC ERP
 
 Este documento registra o padrão de versionamento utilizado e todas as versões liberadas do sistema.
