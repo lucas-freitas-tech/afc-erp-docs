@@ -1,14 +1,14 @@
 # 🗺️ Roadmap Geral AFC-ERP
 
-Este roadmap cobre todas as fases planejadas atualmente, incluindo os sistemas de Login, ERP.
+Este roadmap cobre todas as fases planejadas para o ERP da AFC Placas.
 
 ---
 
-## 📌 Fase 1 — Login para o ERP
+## 📌 Fase 1 — Módulo de identidade do ERP
 
 **Objetivo:** Entregar autenticação básica e segura para o ERP.
 
-### [Spec 0.1.0 — MVP de Login](../specs/0.1.0-identity/README.md)
+### [Ir para a especificação](../specs/identity/README.md)
 
 - Autenticação com e-mail/senha
 - Controle de sessão e permissões básicas
@@ -17,15 +17,13 @@ Este roadmap cobre todas as fases planejadas atualmente, incluindo os sistemas d
   - Gestão de Roles
   - Gestão de Permissions
 
-> Melhorias futuras apenas se surgirem demandas de segurança.
-
 ---
 
 ## 🧩 Fase 2 — Módulo de Orçamentos do ERP
 
 **Objetivo:** Criar o primeiro componente funcional dentro do ERP utilizando a base de login existente.
 
-### Spec 1.0.0 — Criar Orçamentos
+### [Ir para a especificação (em construção)](../specs/identity/README.md)
 
 - Criar orçamento no ERP
 - Listar/visualizar orçamentos

@@ -1,9 +1,8 @@
-# Resumo Executivo — Sistema de Autenticação e Controle de Acessos (RBAC)
+# Módulo Identity — Autenticação e Controle de Acessos (RBAC)
 
 ## Visão Geral
 
-O Sistema de Autenticação RBAC é um módulo genérico e reutilizável, responsável por garantir o acesso seguro a aplicações, controlando o que cada usuário pode visualizar e executar conforme seu nível de permissão.  
-Pode ser integrado a diferentes projetos da organização, padronizando segurança e facilitando a administração de acessos.
+O Modulo Identity é responsável por garantir o acesso seguro a aplicação, controlando o que cada usuário pode visualizar e executar conforme seu nível de permissão.
 
 ---
 
@@ -106,3 +105,5 @@ Isso garante **padronização e segurança** entre diferentes projetos.
 - Autenticação em duas etapas (2FA)
 - Auditoria detalhada de ações (logs avançados)
 - Bloqueio imediato de tokens após logout
+
+[◀ Voltar para a especificação](./README.md) | [Ir para os fluxos ▶](./flows.md)
