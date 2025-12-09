@@ -110,3 +110,5 @@
 | Usuário autenticado acessa rota protegida mas **não possui** permissions necessárias | Redireciona | Área autenticada |
 | Usuário **não autenticado** acessa rota **inexistente** | Redireciona | página de login |
 | Usuário **autenticado** acessa rota **inexistente** | Redireciona | Área autenticada |
+
+[◀ Voltar para o escopo](./scope.md) | [⯅ Ir para a especificação](./README.md) | [Ir para a arquitetura ▶](./architecture.md)

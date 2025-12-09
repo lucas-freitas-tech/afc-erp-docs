@@ -1,12 +1,14 @@
-# 📘 Módulo de Autenticação e Controle de Acessos (RBAC)
+# 📘 Módulo Identity — Autenticação e Controle de Acessos (RBAC)
 
 ## 1. Visão Geral
 
-O módulo de Autenticação e Controle de Acessos (RBAC) é uma parte fundamental da infraestrutura do ERP AFC, responsável por proteger recursos internos e garantir que cada usuário tenha acesso apenas ao que lhe é permitido.
+O módulo identity — autenticação e controle de Acessos. É uma parte fundamental da infraestrutura do ERP AFC, responsável por proteger recursos internos e garantir que cada usuário tenha acesso apenas ao que lhe é permitido.
+
 Ele atua como a camada de segurança do sistema, servindo de base para os demais módulos do ERP.
+
 Seu design permite evoluir o ERP por etapas, mantendo o controle de acesso centralizado e padronizado.
 
-A solução foi projetada para ser **simples, escalável, modular e reutilizável** em outros sistemas da empresa.
+A solução foi projetada para ser **simples, escalável, modular**.
 
 ---
 
@@ -20,14 +22,15 @@ A solução foi projetada para ser **simples, escalável, modular e reutilizáve
 
 ---
 
-## 3. Componentes Principais da Arquitetura
+## 3. Componentes Principais na Arquitetura do Sistema
 
-A solução é composta por três áreas principais:
+Detalhamento dos componentes internos ao módulo:
 
 ### 3.1. Frontend (Angular)
 
-- Aplicação SPA responsável pela interface do usuário.
-- Módulos independentes para:
+- SPA integrada ao ecossistema web da solução.
+- Implementa os fluxos específicos de autenticação e administração de segurança
+- Organizado em módulos funcionais:
   - Login
   - Dashboard
   - Administração (usuários, roles, permissões)
@@ -35,21 +38,21 @@ A solução é composta por três áreas principais:
 
 ### 3.2. Backend (Spring Boot)
 
-- API REST responsável pela lógica de autenticação, autorização e gestão administrativa.
+- Serviço REST responsável pela gestão de identidade e acesso.
 - Estruturado de forma modular por domínio:
   - `auth`
   - `user`
   - `role`
   - `permission`
 - Implementa:
-  - Login
-  - Refresh de tokens
-  - Validação de permissões
-  - CRUDs administrativos
+  - Login e refresh
+  - Autorização com base em RBAC
+  - CRUD administrativo
 
-### 3.3. Banco de Dados Relacional
+### 3.3.1. Banco de Dados Relacional
 
-- Estrutura simples e padronizada:
+- Modelo alinhado ao padrão de RBAC já previsto na arquitetura do sistema.
+- Estruturas principais:
   - `users`
   - `roles`
   - `permissions`
@@ -57,7 +60,7 @@ A solução é composta por três áreas principais:
   - `role_permissions`
 - Relações muitos-para-muitos garantem flexibilidade na composição de perfis.
 
-### 3.4. Diagrama ER — Modelo de Dados
+### 3.3.2 Diagrama ER — Modelo de Dados
 
 ```mermaid
 erDiagram
@@ -144,7 +147,7 @@ A arquitetura modular foi escolhida para:
 ### 5.1. Módulos do Backend
 
 | Módulo         | Responsabilidade                                        |
-|----------------|----------------------------------------------------------|
+|----------------|---------------------------------------------------------|
 | **auth**       | Autenticação, JWT, refresh token, segurança             |
 | **user**       | Gestão de usuários                                      |
 | **role**       | Gestão de roles                                         |
@@ -154,7 +157,7 @@ A arquitetura modular foi escolhida para:
 ### 5.2. Módulos do Frontend
 
 | Módulo         | Responsabilidade                                        |
-|----------------|----------------------------------------------------------|
+|----------------|---------------------------------------------------------|
 | **auth**       | Tela e lógica de login                                  |
 | **dashboard**  | Tela inicial do usuário autenticado                     |
 | **admin**      | Gerenciamento de usuários, roles e permissões           |
@@ -185,3 +188,5 @@ A arquitetura proposta entrega:
 - Um backend claro, seguro e fácil de manter  
 
 Tudo isso mantendo simplicidade e baixo custo de operação, permitindo que o foco do projeto esteja na evolução do produto e não na complexidade da infraestrutura.
+
+[◀ Voltar para os fluxos](./scope.md) | [⯅ Ir para a especificação](./README.md) | [Ir para os épicos ▶](./epics.md)
