@@ -23,19 +23,6 @@ Aqui você encontra o que o produto é hoje e o que ele vai se tornar.
 
 ---
 
-## 🚧 Status Atual
-
-O projeto está nas etapas iniciais:
-
-- ✔ Definição dos módulos iniciais
-- ✔ Estrutura da documentação
-- 🔄 Detalhamento do módulo Identity
-- ⏳ Implementação técnica ainda não iniciada
-
-> A primeira release só será definida após o módulo Identity estar especificado.
-
----
-
 ## 🛡️ Licença
 
 Este projeto segue licença privada e está em desenvolvimento interno.
