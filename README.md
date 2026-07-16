@@ -6,16 +6,20 @@ Aqui você encontra o que o produto é hoje e o que ele vai se tornar.
 
 ---
 
-## 📚 Como está organizada a documentação
+## 📚 Documentação
 
-- 🧭 [Roadmap do Produto](./product/ROADMAP.md)  
-  O que vamos entregar e em qual ordem.
+### Arquitetura
 
-- 🧬 **Decisões de Arquitetura**  
-  Os padrões que guiam o sistema como um todo. (em construção...)
+- 🧬 [Arquitetura Global](./architecture/README.md): contexto do sistema, principais blocos e organização modular.
 
-- 📌 **Histórico de Releases**  
-  O que mudou em cada versão (quando chegarmos lá).
+### Produto
+
+- 🧭 [Roadmap do Produto](./product/ROADMAP.md): ordem de implementação e acesso às especificações de cada módulo.
+- 🔢 [Versionamento do Produto](./product/VERSIONING.md): padrão de versões, tags e histórico de releases.
+
+### Desenvolvimento
+
+- 🌿 [Fluxo Git](./development/GIT_WORKFLOW.md): uso de branches, commits e Pull Requests no projeto.
 
 ---
 
@@ -23,22 +27,12 @@ Aqui você encontra o que o produto é hoje e o que ele vai se tornar.
 
 O projeto está nas etapas iniciais:
 
-✔ Definição dos módulos iniciais
-✔ Estrutura da documentação
-
+- ✔ Definição dos módulos iniciais
+- ✔ Estrutura da documentação
 - 🔄 Detalhamento do módulo Identity
 - ⏳ Implementação técnica ainda não iniciada
 
 > A primeira release só será definida após o módulo Identity estar especificado.
-
----
-
-## 🔢 Versionamento do Produto
-
-O projeto seguirá Versionamento Semântico (SemVer)
-após definição da primeira release.
-
-📄 Mais detalhes: [VERSIONING](./product/VERSIONING.md)
 
 ---
 
