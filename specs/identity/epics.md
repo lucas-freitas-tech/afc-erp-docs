@@ -59,4 +59,4 @@ Critérios de sucesso:
 
 ---
 
-[◀ Voltar para a arquitetura](./architecture.md) | [⯅ Ir para a especificação](./README.md) | [Ir para as Histórias ▶](./epics.md)
+[◀ Voltar para a arquitetura](./architecture.md) | [⯅ Ir para a especificação](./README.md) | [Ir para as Histórias ▶](https://github.com/orgs/lucas-freitas-tech/projects/3/views/1)
