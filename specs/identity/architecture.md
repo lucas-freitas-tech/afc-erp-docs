@@ -18,7 +18,7 @@ A solução foi projetada para ser **simples, escalável, modular**.
 - **Autorização baseada em permissões (RBAC)**, permitindo granularidade fina no controle de acesso.  
 - **Gestão administrativa** completa de usuários, roles e permissões.  
 - **Padronização do modelo de segurança** para todos os módulos do ERP AFC.  
-- **Baixo acoplamento**, permitindo evolução incremental do sisteam como um todo.
+- **Baixo acoplamento**, permitindo evolução incremental do sistema como um todo.
 
 ---
 
@@ -49,7 +49,7 @@ Detalhamento dos componentes internos ao módulo:
   - Autorização com base em RBAC
   - CRUD administrativo
 
-### 3.3.1. Banco de Dados Relacional
+### 3.3. Banco de Dados Relacional
 
 - Modelo alinhado ao padrão de RBAC já previsto na arquitetura do sistema.
 - Estruturas principais:
@@ -60,7 +60,7 @@ Detalhamento dos componentes internos ao módulo:
   - `role_permissions`
 - Relações muitos-para-muitos garantem flexibilidade na composição de perfis.
 
-### 3.3.2 Diagrama ER — Modelo de Dados
+### 3.4. Diagrama ER — Modelo de Dados
 
 ```mermaid
 erDiagram

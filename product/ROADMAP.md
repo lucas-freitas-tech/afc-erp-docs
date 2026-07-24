@@ -23,7 +23,7 @@ Este roadmap cobre todas as fases planejadas para o ERP da AFC Placas.
 
 **Objetivo:** Criar o primeiro componente funcional dentro do ERP utilizando a base de login existente.
 
-### [Ir para a especificação (em construção)](../specs/identity/README.md)
+**Especificação em construção.**
 
 - Criar orçamento no ERP
 - Listar/visualizar orçamentos
