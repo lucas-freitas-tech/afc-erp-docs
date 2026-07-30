@@ -40,10 +40,9 @@ Detalhamento dos componentes internos ao módulo:
 
 - Serviço REST responsável pela gestão de identidade e acesso.
 - Estruturado de forma modular por domínio:
-  - `auth`
-  - `user`
-  - `role`
-  - `permission`
+  - `authentication` — comprova quem é o usuário e mantém a sessão
+  - `authorization` — determina o que o usuário pode fazer (modelo RBAC)
+  - `user` — modelo e persistência do usuário
 - Implementa:
   - Login e refresh
   - Autorização com base em RBAC
@@ -58,7 +57,12 @@ Detalhamento dos componentes internos ao módulo:
   - `permissions`
   - `user_roles`
   - `role_permissions`
-- Relações muitos-para-muitos garantem flexibilidade na composição de perfis.
+- Um usuário pode receber várias roles; roles e permissions se relacionam
+  muitos-para-muitos.
+- Role possui identidade UUID e código administrativo único; o código pode ser
+  alterado sem mudar a identidade nem os vínculos.
+- Permission usa `code` como identidade técnica imutável (chave primária).
+- O acesso continua sendo verificado por permissions, não diretamente por roles.
 
 ### 3.4. Diagrama ER — Modelo de Dados
 
@@ -66,40 +70,38 @@ Detalhamento dos componentes internos ao módulo:
 erDiagram
 
     USER {
-        id bigint PK
+        id uuid PK
         name varchar
         email varchar
         password_hash varchar
         active boolean
-        blocked boolean
         created_at timestamp
         updated_at timestamp
     }
 
     ROLE {
-        id bigint PK
+        id uuid PK
+        code varchar UK
         name varchar
         description varchar
-        active boolean
         created_at timestamp
+        updated_at timestamp
     }
 
     PERMISSION {
-        id bigint PK
-        code varchar
+        code varchar PK
         description varchar
-        active boolean
         created_at timestamp
     }
 
     USER_ROLE {
-        user_id bigint FK
-        role_id bigint FK
+        user_id uuid FK
+        role_id uuid FK
     }
 
     ROLE_PERMISSION {
-        role_id bigint FK
-        permission_id bigint FK
+        role_id uuid FK
+        permission_code varchar FK
     }
 
     USER ||--o{ USER_ROLE : "possui"
@@ -146,13 +148,13 @@ A arquitetura modular foi escolhida para:
 
 ### 5.1. Módulos do Backend
 
-| Módulo         | Responsabilidade                                        |
-|----------------|---------------------------------------------------------|
-| **auth**       | Autenticação, JWT, refresh token, segurança             |
-| **user**       | Gestão de usuários                                      |
-| **role**       | Gestão de roles                                         |
-| **permission** | Lista de permissões e vínculo com roles                 |
-| **shared**     | Utilidades e componentes comuns                         |
+| Módulo              | Responsabilidade                                                          |
+|---------------------|---------------------------------------------------------------------------|
+| **authentication**  | Autenticação, sessão, refresh token e contratos HTTP `/auth`              |
+| **authorization**   | Papéis, permissões e consulta de autorização (modelo RBAC)                |
+| **user**            | Modelo, persistência e integração de segurança do usuário                 |
+| **security**        | JWT, CORS e configuração transversal do Spring Security                   |
+| **shared**          | Utilidades e componentes comuns                                           |
 
 ### 5.2. Módulos do Frontend
 
