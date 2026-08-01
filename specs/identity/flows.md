@@ -7,25 +7,24 @@
 3. Usuário informa email e senha.
 4. O sistema envia `POST /auth/signin`.
 5. Se as credenciais forem válidas e o usuário estiver ativo:
-   - Backend retorna access token e refresh token.
-   - Frontend armazena os tokens (ex.: localStorage).
-   - Usuário é redirecionado para o área autenticada
+   - O backend retorna o access token no corpo da resposta.
+   - O backend envia o refresh token em cookie `HttpOnly`.
+   - O frontend mantém o access token somente em memória e não acessa o refresh token.
+   - O usuário é redirecionado para a área autenticada.
 6. Se as credenciais forem inválidas ou o usuário estiver bloqueado:
    - É exibida uma mensagem de erro amigável.
-   - Nenhum token é armazenado.
+   - Nenhuma sessão é iniciada.
 
 ## 2. Fluxo de Acesso a Rota Protegida
 
-1. Usuário tenta acessar uma rota protegida
-2. O guard de rota verifica se existe um access token válido:
-   - Se **não** houver token → redireciona para página de login.
-   - Se houver token:
-     - Frontend decodifica o token para obter usuário e suas permissões.
-     - Verifica se o usuário possui a **permissão** necessária para aquela rota.
-3. Se o usuário tiver permissão:
-   - A rota é carregada normalmente.
-4. Se o usuário **não** tiver permissão:
-   - Acesso é negado (ex.: redireciona para o área autenticada ou para o login).
+1. O bootstrap da aplicação materializa o cookie CSRF com `GET /auth/csrf` e tenta restaurar a
+   sessão com `POST /auth/refresh`.
+2. O guard aguarda a conclusão dessa restauração antes de decidir a navegação.
+3. Se a sessão estiver anônima, o usuário é redirecionado para a página de login.
+4. Se a sessão estiver autenticada, a rota protegida pode ser carregada.
+5. Quando uma rota exigir uma permission específica:
+   - guards e menus podem usar as permissions para orientar a experiência do usuário;
+   - o backend sempre realiza a autorização efetiva e não confia na decisão do frontend.
 
 ---
 
@@ -36,24 +35,28 @@
    - Backend responde com erro indicando expiração do token (ex.: 401 com código específico).
 3. Frontend:
    - Detecta o erro de expiração.
-   - Envia `POST /auth/refresh` com o refresh token.
+   - Envia `POST /auth/refresh` com o cabeçalho CSRF.
+   - O navegador envia automaticamente o refresh token armazenado no cookie `HttpOnly`.
 4. Backend:
-   - Valida o refresh token.
-   - Se válido, retorna um novo access token (e opcionalmente novo refresh token).
-   - Se inválido/expirado, retorna erro e invalida sessão.
+   - Valida e rotaciona o refresh token, preservando sua família.
+   - Recalcula as permissions e o indicador Root do usuário.
+   - Se válido, retorna um novo access token e envia o sucessor do refresh token no cookie.
+   - Se o token for reutilizado, revoga toda a família.
+   - Se for inválido, expirado ou pertencer a um usuário inativo, rejeita a renovação.
 5. Frontend:
    - Em caso de sucesso, repete a requisição original com o novo token.
-   - Em caso de erro, remove tokens do storage e redireciona usuário para página de login.
+   - Em caso de erro, limpa a sessão em memória e redireciona o usuário para a página de login.
 
 ---
 
 ## 4. Fluxo de Logout
 
 1. Usuário clica em "Sair" na interface.
-2. Frontend:
-   - Remove tokens do storage (access e refresh).
-3. Usuário é redirecionado para a página de login.
-4. Tentativas de acessar rotas protegidas após logout:
+2. O frontend garante o token CSRF e envia `POST /auth/logout`.
+3. O backend revoga a família do refresh token e expira seu cookie.
+4. O frontend remove o access token e os dados do usuário mantidos em memória.
+5. O usuário é redirecionado para a página de login.
+6. Tentativas de acessar rotas protegidas após logout:
    - Devem redirecionar para página de login.
 
 ---
@@ -71,7 +74,8 @@
      - Marca usuário como bloqueado → `PATCH /admin/users/{id}/block`.
    - Deletar usuário:
      - `DELETE /admin/users/{id}` (lógico ou físico, conforme modelagem).
-4. páginas e ações só são exibidas se o usuário tiver as **permissions** necessárias.
+4. Páginas e ações só são exibidas se o usuário tiver as **permissions** necessárias para a UX.
+   O backend continua sendo a autoridade que autoriza cada operação.
 
 ---
 
@@ -87,7 +91,8 @@
    - Deletar role (respeitando regras, ex.: não deletar role em uso por usuários).
 4. Alterações em roles **não exigem mudanças em código**:
    - A UI se baseia em permissions para mostrar/ocultar ações.
-   - O backend protege endpoints por permissions, não por roles.
+   - O backend protege os endpoints por permissions, não por roles, e é a autoridade da
+     autorização.
 
 ## 7. Fluxo de Acesso a Rotas Inexistentes (404)
 

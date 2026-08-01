@@ -34,7 +34,8 @@ Detalhamento dos componentes internos ao módulo:
   - Login
   - Dashboard
   - Administração (usuários, roles, permissões)
-- Guards controlam o acesso conforme permissões do usuário autenticado.
+- Guards e menus podem usar permissions para orientar a UX, mas a autorização efetiva permanece
+  no backend.
 
 ### 3.2. Backend (Spring Boot)
 
@@ -121,19 +122,39 @@ O modelo de segurança segue uma abordagem **RBAC baseada em permissões**, gara
 
 - Utiliza JWT com **access token** e **refresh token**.
 - O backend valida credenciais e distribui tokens de forma segura.
-- O frontend mantém somente tokens, sem armazenar senhas.
+- O frontend mantém o access token somente em memória, sem `localStorage` ou `sessionStorage`.
+- O refresh token é opaco, rotativo e enviado exclusivamente em cookie `HttpOnly`; somente seu
+  hash é persistido pelo backend.
+- Refresh e logout exigem proteção CSRF.
 
 ### 4.2. Autorização
 
 - Cada rota/funcionalidade é protegida por **permissions** (ex.: `USER_MANAGE`, `ROLE_MANAGE`).
 - Roles agrupam permissions e podem ser alteradas via interface administrativa.
-- Usuários recebem roles, e suas permissions são calculadas dinamicamente.
+- As permissions efetivas do usuário são resolvidas no signin e em cada refresh. Elas são
+  carregadas no access token JWT e reconstruídas pelo Resource Server.
+- A decisão de autorização é sempre do backend. O frontend pode ocultar ações na interface, mas
+  não decide se o usuário está autorizado.
+- A Role reservada `ROOT` possui bypass central de autorização e não depende de vínculos em
+  `role_permissions`.
+
+#### Validade das alterações de acesso
+
+As permissions e o indicador Root representam um snapshot assinado no momento da emissão do
+access token. Bloqueios de usuário e alterações de roles ou permissions são aplicados imediatamente
+a novos signins e refreshes, mas um access token já emitido continua válido até expirar, por no
+máximo 15 minutos na configuração atual.
+
+Essa janela é um trade-off deliberado do modelo JWT stateless. Durante esse período, o backend
+valida a assinatura e as claims do token sem consultar o estado atual do usuário a cada requisição.
+O refresh de usuários inativos é recusado e recalcula as autorizações dos usuários ativos. Caso o
+risco do produto exija revogação imediata no futuro, esse modelo deverá ser revisto.
 
 ### 4.3. Benefícios
 
 - Granularidade fina no controle de acesso.  
 - Flexibilidade para criar novos perfis sem alterar o código.  
-- Segurança consistente entre frontend e backend.  
+- Segurança consistente, com o backend como autoridade de autorização.
 
 ---
 
