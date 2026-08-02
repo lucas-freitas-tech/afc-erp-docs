@@ -1,19 +1,31 @@
 # Fluxos do Usuário
 
-## 1. Fluxo de Login (credenciais)
+## 1. Fluxo de Login e Troca Obrigatória de Senha
 
 1. Usuário acessa uma página protegida ou a página de login.
 2. Caso não esteja autenticado, é redirecionado para a página de login.
-3. Usuário informa email e senha.
+3. Usuário informa e-mail e senha.
 4. O sistema envia `POST /auth/signin`.
-5. Se as credenciais forem válidas e o usuário estiver ativo:
-   - O backend retorna o access token no corpo da resposta.
-   - O backend envia o refresh token em cookie `HttpOnly`.
-   - O frontend mantém o access token somente em memória e não acessa o refresh token.
-   - O usuário é redirecionado para a área autenticada.
-6. Se as credenciais forem inválidas ou o usuário estiver inativo:
+5. Se as credenciais forem inválidas ou o usuário estiver inativo:
    - É exibida uma mensagem de erro amigável.
    - Nenhuma sessão é iniciada.
+6. Se as credenciais forem válidas e a troca de senha **não** for exigida:
+   - O backend retorna o access token no corpo da resposta.
+   - O backend envia o refresh token em cookie `HttpOnly`.
+   - Permissions e o indicador Root são carregados na sessão.
+   - O frontend mantém o access token somente em memória e não acessa o refresh token.
+   - O usuário é redirecionado para a área autenticada (home).
+7. Se as credenciais forem válidas e a troca de senha for **obrigatória**:
+   - O backend inicia uma sessão restrita.
+   - A sessão não carrega permissions e não concede bypass Root.
+   - O usuário só pode trocar a senha e fazer logout.
+   - O frontend redireciona para a tela de nova senha.
+8. Depois que o usuário define a nova senha:
+   - A obrigatoriedade de troca é removida.
+   - A sessão restrita é encerrada.
+   - O usuário precisa realizar um novo login para iniciar uma sessão normal.
+
+---
 
 ## 2. Fluxo de Acesso a Rota Protegida
 
@@ -21,14 +33,16 @@
    sessão com `POST /auth/refresh`.
 2. O guard aguarda a conclusão dessa restauração antes de decidir a navegação.
 3. Se a sessão estiver anônima, o usuário é redirecionado para a página de login.
-4. Se a sessão estiver autenticada, a rota protegida pode ser carregada.
-5. Quando uma rota exigir uma permission específica:
+4. Se a sessão estiver restrita por troca obrigatória de senha, o usuário não acessa as
+   funcionalidades normais e é direcionado para a tela de nova senha.
+5. Se a sessão estiver autenticada normalmente, a rota protegida pode ser carregada.
+6. Quando uma rota exigir uma permission específica:
    - guards e menus podem usar as permissions para orientar a experiência do usuário;
    - o backend sempre realiza a autorização efetiva e não confia na decisão do frontend.
 
 ---
 
-## 3. Fluxo de Renovação de Token (Refresh)
+## 3. Fluxo de Renovação de Sessão
 
 1. Usuário navega normalmente até o access token expirar.
 2. Ao fazer uma requisição com token expirado:
@@ -40,11 +54,13 @@
 4. Backend:
    - Valida e rotaciona o refresh token, preservando sua família.
    - Recalcula as permissions e o indicador Root do usuário.
+   - Preserva ou recalcula o estado de troca obrigatória de senha.
+   - Uma sessão restrita não pode ganhar acesso normal por meio do refresh.
    - Se válido, retorna um novo access token e envia o sucessor do refresh token no cookie.
    - Se o token for reutilizado, revoga toda a família.
    - Se for inválido, expirado ou pertencer a um usuário inativo, rejeita a renovação.
 5. Frontend:
-   - Em caso de sucesso, repete a requisição original com o novo token.
+   - Em caso de sucesso, repete a requisição original com o novo token uma única vez.
    - Em caso de erro, limpa a sessão em memória e redireciona o usuário para a página de login.
 
 ---
@@ -56,92 +72,95 @@
 3. O backend revoga a família do refresh token e expira seu cookie.
 4. O frontend remove o access token e os dados do usuário mantidos em memória.
 5. O usuário é redirecionado para a página de login.
-6. Tentativas de acessar rotas protegidas após logout:
-   - Devem redirecionar para página de login.
+6. Tentativas de acessar rotas protegidas após logout devem redirecionar para a página de login.
+
+O logout aplica-se tanto à sessão normal quanto à sessão restrita por troca obrigatória.
 
 ---
 
-## 5. Fluxo de Gestão de Usuários (Admin)
+## 5. Fluxo de Gestão de Usuários
 
-1. Usuário com permission apropriada (ex.: `USER_MANAGE`) acessa o painel admin.
-2. Frontend chama endpoint de listagem de usuários (ex.: `GET /admin/users`).
-3. Admin pode:
-   - Criar novo usuário:
-     - Preenche dados + roles → `POST /admin/users`.
-   - Editar usuário:
-     - Altera dados/roles → `PUT /admin/users/{id}`.
-   - Ativar ou desativar usuário conforme sua situação.
-   - Deletar usuário:
-     - `DELETE /admin/users/{id}` (lógico ou físico, conforme modelagem).
-4. Páginas e ações só são exibidas se o usuário tiver as **permissions** necessárias para a UX.
-   O backend continua sendo a autoridade que autoriza cada operação.
+1. Usuário com permission apropriada (ex.: `USER_MANAGE`) acessa a área administrativa de
+   usuários.
+2. Frontend consulta a listagem e os detalhes dos usuários.
+3. Administrador pode:
+   - criar usuário com dados, roles e senha temporária;
+   - editar dados e roles;
+   - ativar ou desativar usuário;
+   - redefinir a senha esquecida por meio de senha temporária;
+   - excluir usuário conforme regras futuras.
+4. Na criação ou redefinição administrativa de senha, o backend:
+   - armazena somente o hash da senha temporária;
+   - marca a troca de senha como obrigatória;
+   - revoga todas as famílias de refresh token do usuário na redefinição;
+   - não permite que um administrador comum redefina a senha de uma conta Root.
+5. A senha temporária é entregue por canal interno controlado e não é enviada por e-mail nesta
+   versão. Ela nunca é registrada em logs.
+6. Páginas e ações só são exibidas se o usuário tiver as permissions necessárias para a UX. O
+   backend continua sendo a autoridade que autoriza cada operação.
 
 ---
 
-## 6. Fluxo de Gestão de Roles e Permissions (Admin)
+## 6. Fluxo de Gestão de Roles e Permissions
 
-1. Usuário admin com permission apropriada (ex.: `ROLE_MANAGE`) acessa a área de roles.
+1. Usuário com permission apropriada (ex.: `ROLE_MANAGE`) acessa a área de roles.
 2. Frontend consulta:
-   - Lista de roles (`GET /admin/roles`).
-   - Lista de permissions (`GET /admin/permissions`).
-3. Admin pode:
-   - Criar nova role, escolhendo um conjunto de permissions.
-   - Atualizar uma role existente (adicionar/remover permissions).
-   - Deletar role (respeitando regras, ex.: não deletar role em uso por usuários).
-4. Alterações em roles **não exigem mudanças em código**:
-   - A UI se baseia em permissions para mostrar/ocultar ações.
-   - O backend protege os endpoints por permissions, não por roles, e é a autoridade da
-     autorização.
+   - a lista de roles administrativas;
+   - o catálogo de permissions, somente para leitura.
+3. Administrador pode:
+   - criar, atualizar e excluir roles;
+   - vincular e desvincular permissions às roles.
+4. O catálogo de permissions não é criado, editado ou excluído pelo CRUD administrativo; a
+   interface apenas o consulta.
+5. A autorização efetiva continua sendo por permission, não por role.
+6. A Role Root não é exibida nem manipulada por administradores comuns.
+7. Alterações em roles não exigem mudanças em código:
+   - a UI se baseia em permissions para mostrar ou ocultar ações;
+   - o backend protege os endpoints por permissions e é a autoridade da autorização.
+
+---
 
 ## 7. Fluxo do Perfil do Usuário
 
 1. O usuário autenticado acessa o próprio perfil.
-2. O backend identifica o usuário pelo access token; o cliente não escolhe o identificador da conta
-   consultada.
+2. O backend identifica a conta pelo access token; o cliente não escolhe o identificador do
+   usuário consultado.
 3. O usuário pode:
    - consultar os próprios dados;
    - atualizar os campos pessoais permitidos;
-   - solicitar a troca da própria senha informando a senha atual.
+   - trocar a própria senha informando a senha atual.
 4. O fluxo de perfil não permite alterar roles, permissions, estado da conta ou dados de outro
    usuário.
-5. Dados sensíveis, password hashes e informações internas de segurança nunca são retornados.
+5. Redefinição administrativa de senha não faz parte deste fluxo.
+6. Dados sensíveis, password hashes e informações internas de segurança nunca são retornados.
 
-## 8. Fluxo de Criação e Redefinição Administrativa de Senha
+---
 
-1. Ao criar um usuário, o administrador define ou recebe uma senha temporária.
-2. Quando um usuário esquece a senha, um administrador com a permission apropriada pode redefini-la
-   sem conhecer a senha anterior.
-3. O backend:
-   - armazena somente o hash da senha temporária;
-   - marca a troca de senha como obrigatória;
-   - revoga todas as famílias de refresh token do usuário em uma redefinição;
-   - não permite que um administrador comum redefina a senha de uma conta Root.
-4. O usuário entra com a senha temporária e recebe acesso restrito à troca de senha e ao logout.
-5. Depois de definir uma senha nova, a obrigatoriedade é removida e o usuário realiza uma nova
-   autenticação para iniciar a sessão normal.
-6. A senha temporária não é enviada por e-mail nesta versão; ela é entregue por um canal interno
-   controlado e nunca é registrada em logs.
-
-## 9. Fluxo de Acesso a Rotas Inexistentes (404)
+## 8. Fluxo de Acesso a Rota Inexistente
 
 1. Usuário acessa uma URL que não existe na aplicação.
-2. Frontend detecta rota inexistente (erro 404 no client-side).
+2. Frontend detecta rota inexistente.
 3. O sistema redireciona o usuário:
-   - Para a **página de login** se o usuário não estiver autenticado.
-   - Para o **área autenticada** se estiver autenticado.
-4. Opcional:
-   - Exibição de mensagem de informação (ex.: “Página não encontrada”).
+   - para a página de login, se não estiver autenticado;
+   - para a home (área autenticada), se estiver autenticado.
+4. Opcionalmente, pode ser apresentada uma mensagem de página não encontrada.
 
-## 10. Regras de Navegação por Tipo de Usuário
+---
+
+## 9. Regras de Navegação
 
 | Situação | Ação do Sistema | Destino |
 |---------|-----------------|---------|
-| Usuário **não autenticado** acessa rota pública | Carrega a rota | Rota solicitada |
-| Usuário **não autenticado** acessa rota protegida | Redireciona | página de login |
-| Usuário **autenticado** acessa Login | Redireciona | Área autenticada |
-| Usuário **autenticado** acessa rota protegida e **possui** a permission necessária | Carrega a rota | Rota solicitada |
-| Usuário autenticado acessa rota protegida mas **não possui** permissions necessárias | Redireciona | Área autenticada |
-| Usuário **não autenticado** acessa rota **inexistente** | Redireciona | página de login |
-| Usuário **autenticado** acessa rota **inexistente** | Redireciona | Área autenticada |
+| Visitante acessa rota pública | Carrega a rota | Rota solicitada |
+| Visitante acessa rota protegida | Redireciona | Página de login |
+| Usuário autenticado acessa login | Redireciona | Home |
+| Usuário autenticado possui a permission necessária | Carrega a rota | Rota solicitada |
+| Usuário autenticado não possui a permission necessária | Nega o acesso | Home ou área autenticada |
+| Root acessa funcionalidade protegida | Permite pelo bypass | Rota solicitada |
+| Usuário com troca obrigatória de senha | Restringe o acesso | Tela de nova senha |
+| Sessão sem refresh válido | Encerra a sessão em memória | Página de login |
+| Usuário inativo | Não inicia nem renova sessão | Página de login / erro de autenticação |
+| Visitante acessa rota inexistente | Redireciona | Página de login |
+| Usuário autenticado acessa rota inexistente | Redireciona | Home |
 
 [◀ Voltar para o escopo](./scope.md) | [⯅ Ir para a especificação](./README.md) | [Ir para a arquitetura ▶](./architecture.md)
