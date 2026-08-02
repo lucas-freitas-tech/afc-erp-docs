@@ -25,7 +25,8 @@ O controle de acessos é feito em **3 níveis relacionados**:
 | **Permission (Permissão)** | Autorizações individuais para executar ações específicas | Gerenciar usuários, Visualizar lista, Excluir registros |
 
 📌 O sistema **não** verifica acessos diretamente por perfis, mas sim por permissões.  
-📌 Cada perfil pode ter várias permissões, e um usuário recebe as permissões do seu perfil.
+📌 Cada role pode ter várias permissões. Um usuário pode possuir várias roles e recebe a união das
+permissões atribuídas a elas.
 
 Exemplo simples:
 
@@ -42,13 +43,17 @@ Isso garante **padronização e segurança** entre diferentes projetos.
 ### Acesso ao Sistema
 
 - Login com e-mail e senha
+- Consulta e atualização do próprio perfil
+- Troca da própria senha
+- Troca obrigatória de senha temporária no primeiro acesso ou após redefinição administrativa
 
 ### Administração (apenas para usuários autorizados)
 
 - Listagem e busca de usuários
-- Criação, edição, bloqueio e exclusão de usuários
-- Criação, edição, bloqueio e exclusão de perfils (roles)
+- Criação, edição, ativação, desativação e exclusão de usuários
+- Criação, edição e exclusão de perfis (roles)
 - Visualização das permissões cadastradas no sistema
+- Redefinição administrativa de senha por meio de senha temporária
 
 ---
 
@@ -57,8 +62,8 @@ Isso garante **padronização e segurança** entre diferentes projetos.
 - **RN001 — Email único**
   Cada usuário deve possuir um e-mail único para autenticação no sistema.
 
-- **RN002 — Acesso bloqueado**
-  Usuários bloqueados não podem acessar nenhuma área autenticada.
+- **RN002 — Usuário inativo**
+  Usuários inativos não podem acessar nenhuma área autenticada.
 
 - **RN003 — RBAC baseado em permissões**
   O acesso às funcionalidades do sistema deve ser autorizado exclusivamente por permissões registradas no sistema, não por roles diretamente.
@@ -84,6 +89,27 @@ Isso garante **padronização e segurança** entre diferentes projetos.
 
 - **RN010 — Isolamento da Role Root**
   A role root não deve ser exibida ou manipulada por nenhum usuário que não seja root. Apenas o root pode criar ou modificar outro root.
+
+- **RN011 — Perfil do próprio usuário**
+  O usuário pode consultar e alterar somente os próprios dados permitidos. Roles, permissions e
+  estado da conta não podem ser modificados pelo fluxo de perfil.
+
+- **RN012 — Troca da própria senha**
+  A troca voluntária de senha deve exigir a senha atual e não pode expor ou registrar nenhuma das
+  credenciais informadas.
+
+- **RN013 — Redefinição administrativa de senha**
+  Um administrador autorizado pode redefinir a senha de um usuário para uma senha temporária sem
+  conhecer a senha anterior. A operação deve revogar as sessões existentes do usuário.
+
+- **RN014 — Troca obrigatória de senha temporária**
+  Usuários criados com senha temporária ou que tiveram a senha redefinida devem trocar a senha antes
+  de acessar as demais funcionalidades. O backend deve aplicar essa restrição; o redirecionamento do
+  frontend não é uma proteção suficiente.
+
+- **RN015 — Proteção da conta Root**
+  Administradores comuns não podem redefinir a senha, desativar ou alterar os acessos de uma conta
+  Root.
 
 ---
 
