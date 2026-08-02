@@ -46,16 +46,38 @@ Critérios de sucesso:
 
 Abrange:
 
-- CRUD de usuários com bloqueio
-- CRUD de roles e permissions
+- CRUD de usuários com ativação e desativação
+- CRUD de roles
 - Visualização do catálogo de permissões
-- Edição de vínculo entre usuários, perfis e permissões
+- Edição de vínculos entre usuários e roles e entre roles e permissões
+- Redefinição administrativa de senha temporária
 
 Critérios de sucesso:
 
 - Admin pode gerenciar todo o fluxo de acesso
 - Permissões nunca são removidas, apenas adicionadas
-- Usuário bloqueado não acessa mais o sistema
+- Usuário inativo não acessa mais o sistema
+
+---
+
+## 👤 Épico 4 — Perfil e credenciais do usuário
+
+🎯 Objetivo: Permitir que o usuário consulte sua conta e mantenha sua própria senha com segurança.
+
+Abrange:
+
+- Consulta do próprio perfil
+- Atualização dos dados pessoais permitidos
+- Troca voluntária de senha mediante confirmação da senha atual
+- Troca obrigatória no primeiro acesso ou após redefinição administrativa
+- Restrição de acesso enquanto a troca obrigatória estiver pendente
+
+Critérios de sucesso:
+
+- Usuário não acessa nem modifica o perfil de outra pessoa
+- Perfil não permite alterar roles, permissions ou estado da conta
+- Senha temporária não concede acesso normal antes de ser substituída
+- Credenciais e hashes nunca são expostos
 
 ---
 

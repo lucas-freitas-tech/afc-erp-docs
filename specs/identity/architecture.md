@@ -32,7 +32,7 @@ Detalhamento dos componentes internos ao módulo:
 - Implementa os fluxos específicos de autenticação e administração de segurança
 - Organizado em módulos funcionais:
   - Login
-  - Dashboard
+  - Home da área autenticada
   - Administração (usuários, roles, permissões)
 - Guards e menus podem usar permissions para orientar a UX, mas a autorização efetiva permanece
   no backend.
@@ -48,6 +48,7 @@ Detalhamento dos componentes internos ao módulo:
   - Login e refresh
   - Autorização com base em RBAC
   - CRUD administrativo
+  - Perfil do usuário e manutenção segura de credenciais
 
 ### 3.3. Banco de Dados Relacional
 
@@ -75,6 +76,7 @@ erDiagram
         name varchar
         email varchar
         password_hash varchar
+        password_change_required boolean
         active boolean
         created_at timestamp
         updated_at timestamp
@@ -126,6 +128,9 @@ O modelo de segurança segue uma abordagem **RBAC baseada em permissões**, gara
 - O refresh token é opaco, rotativo e enviado exclusivamente em cookie `HttpOnly`; somente seu
   hash é persistido pelo backend.
 - Refresh e logout exigem proteção CSRF.
+- Usuários criados ou redefinidos com senha temporária recebem uma sessão restrita até concluírem a
+  troca obrigatória de senha.
+- A manutenção do próprio perfil não permite alterar roles, permissions ou estado da conta.
 
 ### 4.2. Autorização
 
@@ -182,7 +187,7 @@ A arquitetura modular foi escolhida para:
 | Módulo         | Responsabilidade                                        |
 |----------------|---------------------------------------------------------|
 | **auth**       | Tela e lógica de login                                  |
-| **dashboard**  | Tela inicial do usuário autenticado                     |
+| **home**       | Tela inicial do usuário autenticado                     |
 | **admin**      | Gerenciamento de usuários, roles e permissões           |
 | **core**       | Guards, serviços e interceptores                        |
 | **shared**     | Componentes reutilizáveis                               |

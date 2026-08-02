@@ -11,7 +11,7 @@
    - O backend envia o refresh token em cookie `HttpOnly`.
    - O frontend mantém o access token somente em memória e não acessa o refresh token.
    - O usuário é redirecionado para a área autenticada.
-6. Se as credenciais forem inválidas ou o usuário estiver bloqueado:
+6. Se as credenciais forem inválidas ou o usuário estiver inativo:
    - É exibida uma mensagem de erro amigável.
    - Nenhuma sessão é iniciada.
 
@@ -32,9 +32,9 @@
 
 1. Usuário navega normalmente até o access token expirar.
 2. Ao fazer uma requisição com token expirado:
-   - Backend responde com erro indicando expiração do token (ex.: 401 com código específico).
+   - Backend responde `401 UNAUTHORIZED` sem revelar detalhes sobre o motivo da rejeição.
 3. Frontend:
-   - Detecta o erro de expiração.
+   - Detecta o `401` de uma requisição protegida elegível para renovação.
    - Envia `POST /auth/refresh` com o cabeçalho CSRF.
    - O navegador envia automaticamente o refresh token armazenado no cookie `HttpOnly`.
 4. Backend:
@@ -70,8 +70,7 @@
      - Preenche dados + roles → `POST /admin/users`.
    - Editar usuário:
      - Altera dados/roles → `PUT /admin/users/{id}`.
-   - Bloquear usuário:
-     - Marca usuário como bloqueado → `PATCH /admin/users/{id}/block`.
+   - Ativar ou desativar usuário conforme sua situação.
    - Deletar usuário:
      - `DELETE /admin/users/{id}` (lógico ou físico, conforme modelagem).
 4. Páginas e ações só são exibidas se o usuário tiver as **permissions** necessárias para a UX.
@@ -94,7 +93,36 @@
    - O backend protege os endpoints por permissions, não por roles, e é a autoridade da
      autorização.
 
-## 7. Fluxo de Acesso a Rotas Inexistentes (404)
+## 7. Fluxo do Perfil do Usuário
+
+1. O usuário autenticado acessa o próprio perfil.
+2. O backend identifica o usuário pelo access token; o cliente não escolhe o identificador da conta
+   consultada.
+3. O usuário pode:
+   - consultar os próprios dados;
+   - atualizar os campos pessoais permitidos;
+   - solicitar a troca da própria senha informando a senha atual.
+4. O fluxo de perfil não permite alterar roles, permissions, estado da conta ou dados de outro
+   usuário.
+5. Dados sensíveis, password hashes e informações internas de segurança nunca são retornados.
+
+## 8. Fluxo de Criação e Redefinição Administrativa de Senha
+
+1. Ao criar um usuário, o administrador define ou recebe uma senha temporária.
+2. Quando um usuário esquece a senha, um administrador com a permission apropriada pode redefini-la
+   sem conhecer a senha anterior.
+3. O backend:
+   - armazena somente o hash da senha temporária;
+   - marca a troca de senha como obrigatória;
+   - revoga todas as famílias de refresh token do usuário em uma redefinição;
+   - não permite que um administrador comum redefina a senha de uma conta Root.
+4. O usuário entra com a senha temporária e recebe acesso restrito à troca de senha e ao logout.
+5. Depois de definir uma senha nova, a obrigatoriedade é removida e o usuário realiza uma nova
+   autenticação para iniciar a sessão normal.
+6. A senha temporária não é enviada por e-mail nesta versão; ela é entregue por um canal interno
+   controlado e nunca é registrada em logs.
+
+## 9. Fluxo de Acesso a Rotas Inexistentes (404)
 
 1. Usuário acessa uma URL que não existe na aplicação.
 2. Frontend detecta rota inexistente (erro 404 no client-side).
@@ -104,13 +132,13 @@
 4. Opcional:
    - Exibição de mensagem de informação (ex.: “Página não encontrada”).
 
-## 8. Regras de Navegação por Tipo de Usuário
+## 10. Regras de Navegação por Tipo de Usuário
 
 | Situação | Ação do Sistema | Destino |
 |---------|-----------------|---------|
 | Usuário **não autenticado** acessa rota pública | Carrega a rota | Rota solicitada |
 | Usuário **não autenticado** acessa rota protegida | Redireciona | página de login |
-| Usuário **autenticado** acessa Login ou Signup | Redireciona | Área autenticada |
+| Usuário **autenticado** acessa Login | Redireciona | Área autenticada |
 | Usuário **autenticado** acessa rota protegida e **possui** a permission necessária | Carrega a rota | Rota solicitada |
 | Usuário autenticado acessa rota protegida mas **não possui** permissions necessárias | Redireciona | Área autenticada |
 | Usuário **não autenticado** acessa rota **inexistente** | Redireciona | página de login |
