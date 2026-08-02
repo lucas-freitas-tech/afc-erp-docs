@@ -1,72 +1,74 @@
-# 📘 Módulo Identity — Autenticação e Controle de Acessos (RBAC)
+# Módulo Identity — Arquitetura
 
-## 1. Visão Geral
+## 1. Propósito e limites deste documento
 
-O módulo identity — autenticação e controle de Acessos. É uma parte fundamental da infraestrutura do ERP AFC, responsável por proteger recursos internos e garantir que cada usuário tenha acesso apenas ao que lhe é permitido.
+Este documento descreve a solução técnica do módulo Identity: fronteiras, componentes,
+modelo de dados, estratégias de autenticação e autorização, organização modular e trade-offs.
 
-Ele atua como a camada de segurança do sistema, servindo de base para os demais módulos do ERP.
+Fontes relacionadas:
 
-Seu design permite evoluir o ERP por etapas, mantendo o controle de acesso centralizado e padronizado.
+- [Escopo](./scope.md) — capacidades, regras de negócio e limites do módulo
+- [Fluxos](./flows.md) — sequência dos comportamentos esperados
+- [Arquitetura global](../../architecture/architecture.md) — contexto de nível superior do ERP
 
-A solução foi projetada para ser **simples, escalável, modular**.
-
----
-
-## 2. Objetivos do Módulo
-
-- **Autenticação segura** de usuários por meio de token JWT.  
-- **Autorização baseada em permissões (RBAC)**, permitindo granularidade fina no controle de acesso.  
-- **Gestão administrativa** completa de usuários, roles e permissões.  
-- **Padronização do modelo de segurança** para todos os módulos do ERP AFC.  
-- **Baixo acoplamento**, permitindo evolução incremental do sistema como um todo.
+Decisões internas deste documento não ampliam o escopo do produto. Quando uma regra funcional for
+citada, o objetivo é explicar o impacto técnico correspondente, sem redefinir o comportamento.
 
 ---
 
-## 3. Componentes Principais na Arquitetura do Sistema
+## 2. Visão técnica do módulo
 
-Detalhamento dos componentes internos ao módulo:
+O Identity é a base transversal de autenticação e controle de acesso do AFC ERP. Tecnicamente, ele
+concentra:
 
-### 3.1. Frontend (Angular)
+- emissão e validação de sessão autenticada;
+- resolução e transporte de autorizações;
+- persistência do domínio de usuários, roles, permissions e refresh tokens;
+- contratos HTTP e configuração de segurança compartilhados pelos demais módulos.
 
-- SPA integrada ao ecossistema web da solução.
-- Implementa os fluxos específicos de autenticação e administração de segurança
-- Organizado em módulos funcionais:
-  - Login
-  - Home da área autenticada
-  - Administração (usuários, roles, permissões)
-- Guards e menus podem usar permissions para orientar a UX, mas a autorização efetiva permanece
-  no backend.
+A modularização é lógica dentro da aplicação monolítica do ERP. Frontend, backend e banco
+permanecem contêineres distintos, mas o Identity não é um microsserviço separado.
 
-### 3.2. Backend (Spring Boot)
+---
 
-- Serviço REST responsável pela gestão de identidade e acesso.
-- Estruturado de forma modular por domínio:
-  - `authentication` — comprova quem é o usuário e mantém a sessão
-  - `authorization` — determina o que o usuário pode fazer (modelo RBAC)
-  - `user` — modelo e persistência do usuário
-- Implementa:
-  - Login e refresh
-  - Autorização com base em RBAC
-  - CRUD administrativo
-  - Perfil do usuário e manutenção segura de credenciais
+## 3. Componentes e responsabilidades
 
-### 3.3. Banco de Dados Relacional
+### 3.1 Frontend (Angular)
 
-- Modelo alinhado ao padrão de RBAC já previsto na arquitetura do sistema.
-- Estruturas principais:
-  - `users`
-  - `roles`
-  - `permissions`
-  - `user_roles`
-  - `role_permissions`
-- Um usuário pode receber várias roles; roles e permissions se relacionam
-  muitos-para-muitos.
-- Role possui identidade UUID e código administrativo único; o código pode ser
-  alterado sem mudar a identidade nem os vínculos.
-- Permission usa `code` como identidade técnica imutável (chave primária).
-- O acesso continua sendo verificado por permissions, não diretamente por roles.
+- Materializa a experiência de autenticação e as telas administrativas do módulo.
+- Mantém o access token somente em memória; não lê nem manipula o refresh token.
+- Usa guards, interceptors e menus para orientar a navegação e a apresentação com base nas
+  permissions conhecidas na sessão.
+- Nunca é a autoridade final de autorização: o backend decide cada operação protegida.
 
-### 3.4. Diagrama ER — Modelo de Dados
+### 3.2 Backend (Spring Boot)
+
+- Autentica credenciais, emite e valida tokens e aplica CSRF nas operações baseadas em cookie.
+- Resolve permissions e o indicador Root no signin e no refresh.
+- Executa a autorização efetiva e as regras de domínio do Identity.
+- Persiste usuários, roles, permissions, vínculos e o estado dos refresh tokens.
+
+### 3.3 Persistência (PostgreSQL)
+
+- Mantém o modelo relacional necessário à autenticação e ao RBAC.
+- Armazena apenas o hash do refresh token, nunca o valor em claro.
+- Suporta rotação por família, revogação e limpeza periódica dos registros de sessão.
+
+---
+
+## 4. Modelo de dados
+
+O diagrama abaixo inclui o núcleo RBAC e a tabela de refresh tokens, necessária para explicar
+rotação, família e revogação.
+
+Decisões do modelo:
+
+- um usuário pode possuir várias roles;
+- role usa UUID como identidade e possui código administrativo único e editável;
+- permission usa `code` como identidade técnica imutável;
+- usuários recebem permissions exclusivamente através de roles;
+- a Role Root não precisa receber vínculos em `role_permissions`;
+- `refresh_tokens` referencia o usuário e permite rastrear família, uso, revogação e substituição.
 
 ```mermaid
 erDiagram
@@ -107,114 +109,130 @@ erDiagram
         permission_code varchar FK
     }
 
+    REFRESH_TOKEN {
+        id uuid PK
+        user_id uuid FK
+        family_id uuid
+        token_hash varchar UK
+        persistent boolean
+        created_at timestamp
+        expires_at timestamp
+        used_at timestamp
+        revoked_at timestamp
+        replaced_by_id uuid FK
+    }
+
     USER ||--o{ USER_ROLE : "possui"
-    ROLE ||--o{ USER_ROLE : "atribuído a"
+    ROLE ||--o{ USER_ROLE : "atribuída a"
 
     ROLE ||--o{ ROLE_PERMISSION : "possui"
     PERMISSION ||--o{ ROLE_PERMISSION : "atribuída a"
+
+    USER ||--o{ REFRESH_TOKEN : "emite"
+    REFRESH_TOKEN |o--o| REFRESH_TOKEN : "substituído por"
 ```
 
 ---
 
-## 4. Modelo de Segurança
+## 5. Arquitetura de segurança
 
-O modelo de segurança segue uma abordagem **RBAC baseada em permissões**, garantindo amplo controle e flexibilidade.
+### 5.1 Autenticação e sessão
 
-### 4.1. Autenticação
+Decisões técnicas:
 
-- Utiliza JWT com **access token** e **refresh token**.
-- O backend valida credenciais e distribui tokens de forma segura.
-- O frontend mantém o access token somente em memória, sem `localStorage` ou `sessionStorage`.
-- O refresh token é opaco, rotativo e enviado exclusivamente em cookie `HttpOnly`; somente seu
-  hash é persistido pelo backend.
-- Refresh e logout exigem proteção CSRF.
-- Usuários criados ou redefinidos com senha temporária recebem uma sessão restrita até concluírem a
-  troca obrigatória de senha.
-- A manutenção do próprio perfil não permite alterar roles, permissions ou estado da conta.
+- access token JWT assinado e de curta duração;
+- access token mantido apenas em memória no frontend;
+- refresh token opaco, rotativo e de uso único;
+- refresh token enviado em cookie `HttpOnly` e persistido somente como hash;
+- proteção CSRF nas operações que usam o cookie de refresh;
+- rotação por família, com revogação da família diante de reutilização;
+- sessão HTTP stateless no Resource Server.
 
-### 4.2. Autorização
+A duração do access token é configurável; o valor atual de referência é `15m`.
 
-- Cada rota/funcionalidade é protegida por **permissions** (ex.: `USER_MANAGE`, `ROLE_MANAGE`).
-- Roles agrupam permissions e podem ser alteradas via interface administrativa.
-- As permissions efetivas do usuário são resolvidas no signin e em cada refresh. Elas são
-  carregadas no access token JWT e reconstruídas pelo Resource Server.
-- A decisão de autorização é sempre do backend. O frontend pode ocultar ações na interface, mas
-  não decide se o usuário está autorizado.
-- A Role reservada `ROOT` possui bypass central de autorização e não depende de vínculos em
-  `role_permissions`.
+### 5.2 Autorização
 
-#### Validade das alterações de acesso
+- A autorização efetiva ocorre no backend, por permission.
+- Permissions efetivas e o indicador Root são resolvidos no signin e em cada refresh.
+- Esses dados trafegam como claims assinadas do access token.
+- O frontend usa permissions apenas para navegação e apresentação.
+- O bypass Root é centralizado e não preenche artificialmente todas as permissions no token.
+- Em requisições autenticadas normais, o backend valida a assinatura e as claims do JWT sem
+  consultar o usuário no banco a cada chamada.
 
-As permissions e o indicador Root representam um snapshot assinado no momento da emissão do
-access token. Bloqueios de usuário e alterações de roles ou permissions são aplicados imediatamente
-a novos signins e refreshes, mas um access token já emitido continua válido até expirar, por no
-máximo 15 minutos na configuração atual.
+O catálogo de permissions é técnico e imutável pela interface administrativa. A administração
+consulta o catálogo e gerencia seus vínculos com roles; permissions não são criadas, editadas ou
+excluídas pela interface.
 
-Essa janela é um trade-off deliberado do modelo JWT stateless. Durante esse período, o backend
-valida a assinatura e as claims do token sem consultar o estado atual do usuário a cada requisição.
-O refresh de usuários inativos é recusado e recalcula as autorizações dos usuários ativos. Caso o
-risco do produto exija revogação imediata no futuro, esse modelo deverá ser revisto.
+### 5.3 Consistência e validade das autorizações
 
-### 4.3. Benefícios
+Permissions e o indicador Root representam um snapshot assinado no momento da emissão do access
+token. Alterações de roles, permissions ou estado do usuário passam a valer em novos signins e
+refreshes. Um access token já emitido permanece utilizável até expirar.
 
-- Granularidade fina no controle de acesso.  
-- Flexibilidade para criar novos perfis sem alterar o código.  
-- Segurança consistente, com o backend como autoridade de autorização.
+Essa janela é o trade-off do modelo JWT stateless: o backend evita consulta ao banco por
+requisição autenticada, ao custo de aceitar o snapshot até a expiração do access token. Se o
+produto exigir revogação imediata no futuro, o modelo deverá ser revisto.
 
----
+### 5.4 Sessão restrita para troca obrigatória
 
-## 5. Organização Modular
+Impactos técnicos da sessão restrita por troca obrigatória de senha:
 
-A arquitetura modular foi escolhida para:
-
-- Facilitar manutenção.
-- Permitir evolução por partes independentes.
-- Evitar acoplamento entre domínios.
-- Reutilizar o módulo de segurança em outros projetos.
-
-### 5.1. Módulos do Backend
-
-| Módulo              | Responsabilidade                                                          |
-|---------------------|---------------------------------------------------------------------------|
-| **authentication**  | Autenticação, sessão, refresh token e contratos HTTP `/auth`              |
-| **authorization**   | Papéis, permissões e consulta de autorização (modelo RBAC)                |
-| **user**            | Modelo, persistência e integração de segurança do usuário                 |
-| **security**        | JWT, CORS e configuração transversal do Spring Security                   |
-| **shared**          | Utilidades e componentes comuns                                           |
-
-### 5.2. Módulos do Frontend
-
-| Módulo         | Responsabilidade                                        |
-|----------------|---------------------------------------------------------|
-| **auth**       | Tela e lógica de login                                  |
-| **home**       | Tela inicial do usuário autenticado                     |
-| **admin**      | Gerenciamento de usuários, roles e permissões           |
-| **core**       | Guards, serviços e interceptores                        |
-| **shared**     | Componentes reutilizáveis                               |
+- a sessão restrita não recebe permissions nem bypass Root;
+- o estado de troca obrigatória precisa ser preservado ou recalculado no refresh, para que a
+  sessão restrita não ganhe acesso normal apenas pela renovação;
+- a redefinição administrativa revoga as famílias de refresh existentes do usuário;
+- usuário inativo não inicia nem renova sessão;
+- operações sobre o próprio perfil derivam a identidade do principal autenticado, não de um ID
+  escolhido pelo cliente.
 
 ---
 
-## 6. Benefícios da Arquitetura
+## 6. Organização modular
 
-- **Simplicidade operacional**  
-- **Manutenção facilitada**  
-- **Evolução modular**  
-- **Segurança robusta e padronizada**  
-- **Baixo acoplamento**  
-- **Reutilização do módulo RBAC em outras aplicações**  
-- **Facilidade de auditoria e governança de acessos**
+A organização abaixo representa a estrutura arquitetural definida para o módulo. Ela é lógica e não implica microsserviços.
+
+### 6.1 Backend
+
+Pacotes relevantes sob `com.lucas.freitas.tech.afc.erp.backend`:
+
+| Pacote | Responsabilidade |
+|--------|------------------|
+| `identity.authentication` | Signin, logout, emissão de sessão e contratos HTTP `/auth` |
+| `identity.authentication.refresh` | Geração, rotação, cookie, persistência e limpeza de refresh tokens |
+| `identity.authorization` | Roles, permissions, resolução de autorizações e helpers de autorização |
+| `identity.user` | Modelo, persistência e integração do usuário com a segurança |
+| `security` | JWT, CORS, Resource Server e configuração transversal do Spring Security |
+| `shared` | Tratamento de erros e componentes comuns |
+
+### 6.2 Frontend
+
+Organização vigente em `src/app`:
+
+| Área | Responsabilidade |
+|------|------------------|
+| `core/auth` | Sessão em memória, serviços de autenticação, guards e interceptors |
+| `features/auth` | Tela e fluxo de login |
+| `features/home` | Home da área autenticada |
+| `layout` | Estrutura visual da área autenticada |
+
+Features administrativas de usuários e roles devem nascer como features de domínio próprias
+quando forem implementadas, sem antecipar pastas vazias. A sessão e os mecanismos transversais
+permanecem em `core/auth`.
 
 ---
 
-## 7. Conclusão
+## 7. Decisões e trade-offs
 
-A arquitetura proposta entrega:
+| Decisão | Consequência |
+|---------|--------------|
+| JWT stateless para autorização na requisição | Evita consulta ao banco por chamada autenticada; alterações de acesso só atingem um access token já emitido após sua expiração |
+| Refresh rotativo persistido em PostgreSQL | Evita Redis na infraestrutura atual; exige limpeza periódica dos registros de refresh |
+| Access token só em memória no frontend | Evita a persistência do access token no navegador e limita sua exposição após o encerramento da aplicação; não elimina riscos durante um XSS ativo. A restauração de sessão depende do refresh cookie |
+| Frontend usa permissions apenas para UX | Melhora navegação e menus, mas não substitui a autorização do backend |
+| Modularização lógica por pacote/feature | Mantém fronteiras claras sem transformar o ERP em microsserviços |
+| Catálogo de permissions imutável pela UI | Evita divergência entre código e banco; novas permissions entram por evolução controlada do sistema |
 
-- Um núcleo de segurança forte  
-- Um modelo RBAC flexível e expansível  
-- Um frontend modular e organizado  
-- Um backend claro, seguro e fácil de manter  
+---
 
-Tudo isso mantendo simplicidade e baixo custo de operação, permitindo que o foco do projeto esteja na evolução do produto e não na complexidade da infraestrutura.
-
-[◀ Voltar para os fluxos](./scope.md) | [⯅ Ir para a especificação](./README.md) | [Ir para os épicos ▶](./epics.md)
+[◀ Voltar para os fluxos](./flows.md) | [⯅ Ir para a especificação](./README.md) | [Ir para os épicos ▶](./epics.md)

@@ -40,44 +40,32 @@ Critérios de sucesso:
 
 ---
 
-## 🛠️ Épico 3 — Gestão administrativa de acessos
+## 🛠️ Épico 3 — Gestão de usuários e acessos
 
-🎯 Objetivo: Permitir que perfis autorizados administrem todo o sistema de identidade.
+🎯 Objetivo: Permitir que perfis autorizados administrem usuários e acessos, e que cada usuário
+gerencie com segurança os próprios dados e credenciais permitidos.
 
 Abrange:
 
 - CRUD de usuários com ativação e desativação
 - CRUD de roles
-- Visualização do catálogo de permissões
-- Edição de vínculos entre usuários e roles e entre roles e permissões
-- Redefinição administrativa de senha temporária
-
-Critérios de sucesso:
-
-- Admin pode gerenciar todo o fluxo de acesso
-- Permissões nunca são removidas, apenas adicionadas
-- Usuário inativo não acessa mais o sistema
-
----
-
-## 👤 Épico 4 — Perfil e credenciais do usuário
-
-🎯 Objetivo: Permitir que o usuário consulte sua conta e mantenha sua própria senha com segurança.
-
-Abrange:
-
-- Consulta do próprio perfil
-- Atualização dos dados pessoais permitidos
-- Troca voluntária de senha mediante confirmação da senha atual
+- Visualização do catálogo de permissions
+- Vínculos entre usuários e roles
+- Vínculos entre roles e permissions
+- Criação e redefinição administrativa com senha temporária
+- Consulta e atualização do próprio perfil
+- Troca voluntária de senha
 - Troca obrigatória no primeiro acesso ou após redefinição administrativa
-- Restrição de acesso enquanto a troca obrigatória estiver pendente
 
 Critérios de sucesso:
 
-- Usuário não acessa nem modifica o perfil de outra pessoa
-- Perfil não permite alterar roles, permissions ou estado da conta
-- Senha temporária não concede acesso normal antes de ser substituída
+- Administradores autorizados gerenciam usuários e acessos
+- Usuário gerencia somente os próprios dados permitidos
+- Permissions continuam sendo catálogo técnico imutável
+- Usuário inativo não acessa o sistema
+- Senha temporária não concede acesso normal antes da troca
 - Credenciais e hashes nunca são expostos
+- Contas Root permanecem isoladas das operações administrativas comuns
 
 ---
 

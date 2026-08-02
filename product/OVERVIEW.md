@@ -40,10 +40,13 @@ Integrações com sistemas externos ainda não fazem parte do escopo definido. E
 
 O primeiro módulo estabelece a base de autenticação e controle de acesso do ERP. Ele contempla:
 
-- acesso com e-mail e senha;
+- autenticação com e-mail e senha;
 - gerenciamento seguro da sessão;
-- controle de acesso baseado em permissões (RBAC);
-- administração de usuários, roles e permissões.
+- autorização baseada em permissions e roles;
+- gestão de usuários e acessos;
+- consulta e atualização do próprio perfil;
+- troca voluntária de senha;
+- senha temporária e troca obrigatória após criação ou redefinição administrativa.
 
 O Identity é uma capacidade transversal. Sua responsabilidade é identificar o usuário e determinar quais ações ele pode realizar, sem assumir as regras dos demais módulos.
 

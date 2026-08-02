@@ -10,12 +10,14 @@ Este roadmap cobre todas as fases planejadas para o ERP da AFC Placas.
 
 ### [Ir para a especificação](../specs/identity/README.md)
 
-- Autenticação com e-mail/senha
-- Controle de sessão e permissões básicas
-- Painel Administrativo:
-  - Gestão de Usuários
-  - Gestão de Roles
-  - Gestão de Permissions
+- Autenticação com e-mail e senha
+- Sessão segura e controle de acesso baseado em roles e permissions
+- Gestão de usuários e acessos:
+  - Gestão de usuários
+  - Gestão de roles
+  - Consulta do catálogo técnico de permissions
+- Perfil do usuário e manutenção da própria senha
+- Senha temporária e troca obrigatória na gestão segura de credenciais
 
 ---
 
