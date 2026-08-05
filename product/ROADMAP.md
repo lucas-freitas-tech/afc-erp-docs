@@ -35,6 +35,13 @@ Este roadmap cobre todas as fases planejadas para o ERP da AFC Placas.
 
 ---
 
+## 🚀 Preparação para o primeiro deploy
+
+Antes do primeiro deploy em produção, após a conclusão da Fase 2, devem ser atendidos os
+[requisitos de deploy](./DEFERRED_REQUIREMENTS.md).
+
+---
+
 📝 **Documento inicial — será refinado conforme evolução do projeto e aprendizado em cada fase.**
 
 [◀ Voltar para início](../README.md)
