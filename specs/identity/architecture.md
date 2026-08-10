@@ -66,6 +66,8 @@ Decisões do modelo:
 - um usuário pode possuir várias roles;
 - role usa UUID como identidade e possui código administrativo único e editável;
 - permission usa `code` como identidade técnica imutável;
+- permission possui `name` (rótulo de apresentação) e `description` (texto explicativo);
+- permission possui `module_code` técnico obrigatório para agrupamento (ex.: `ADMIN`);
 - usuários recebem permissions exclusivamente através de roles;
 - a Role Root não precisa receber vínculos em `role_permissions`;
 - `refresh_tokens` referencia o usuário e permite rastrear família, uso, revogação e substituição.
@@ -95,7 +97,9 @@ erDiagram
 
     PERMISSION {
         code varchar PK
+        name varchar
         description varchar
+        module_code varchar
         created_at timestamp
     }
 
@@ -160,9 +164,21 @@ A duração do access token é configurável; o valor atual de referência é `1
 - Em requisições autenticadas normais, o backend valida a assinatura e as claims do JWT sem
   consultar o usuário no banco a cada chamada.
 
-O catálogo de permissions é técnico e imutável pela interface administrativa. A administração
-consulta o catálogo e gerencia seus vínculos com roles; permissions não são criadas, editadas ou
-excluídas pela interface.
+O catálogo de permissions é técnico e imutável pela interface administrativa. Cada permission
+expõe:
+
+- `code` — identidade imutável usada na autorização;
+- `name` — nome de apresentação para interfaces administrativas;
+- `description` — descrição complementar da capacidade;
+- `module_code` — código técnico do módulo (convenção `A-Z0-9_`, ex.: `ADMIN`).
+
+O `module_code` agrupa permissions no catálogo e nas telas administrativas. Rótulos amigáveis de
+módulo (ex.: “Administração”) podem ser resolvidos pelo manifesto de navegação do frontend apenas
+para apresentação. Esse manifesto não é fonte de verdade da autorização: o backend continua
+autorizando exclusivamente pelos códigos de permission e pelo bypass Root.
+
+A administração consulta o catálogo e gerencia vínculos com roles; permissions não são criadas,
+editadas ou excluídas pela interface.
 
 ### 5.3 Consistência e validade das autorizações
 
@@ -212,13 +228,15 @@ Organização vigente em `src/app`:
 | Área | Responsabilidade |
 |------|------------------|
 | `core/auth` | Sessão em memória, serviços de autenticação, guards e interceptors |
+| `core/navigation` | Manifesto de módulos/páginas para navegação e rótulos de apresentação |
 | `features/auth` | Tela e fluxo de login |
 | `features/home` | Home da área autenticada |
+| `features/admin` | Catálogo de permissions e listagem/exclusão administrativas de roles |
 | `layout` | Estrutura visual da área autenticada |
 
-Features administrativas de usuários e roles devem nascer como features de domínio próprias
-quando forem implementadas, sem antecipar pastas vazias. A sessão e os mecanismos transversais
-permanecem em `core/auth`.
+Features administrativas adicionais (usuários, criação/edição de roles) devem nascer como features
+de domínio próprias quando forem implementadas, sem antecipar pastas vazias. A sessão e os
+mecanismos transversais permanecem em `core/auth`.
 
 ---
 

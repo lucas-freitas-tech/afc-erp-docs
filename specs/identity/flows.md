@@ -103,20 +103,36 @@ O logout aplica-se tanto à sessão normal quanto à sessão restrita por troca 
 
 ## 6. Fluxo de Gestão de Roles e Permissions
 
-1. Usuário com permission apropriada (ex.: `ROLE_MANAGE`) acessa a área de roles.
-2. Frontend consulta:
-   - a lista de roles administrativas;
-   - o catálogo de permissions, somente para leitura.
-3. Administrador pode:
-   - criar, atualizar e excluir roles;
-   - vincular e desvincular permissions às roles.
-4. O catálogo de permissions não é criado, editado ou excluído pelo CRUD administrativo; a
-   interface apenas o consulta.
-5. A autorização efetiva continua sendo por permission, não por role.
-6. A Role Root não é exibida nem manipulada por administradores comuns.
-7. Alterações em roles não exigem mudanças em código:
-   - a UI se baseia em permissions para mostrar ou ocultar ações;
-   - o backend protege os endpoints por permissions e é a autoridade da autorização.
+### 6.1 Catálogo de permissions
+
+1. Usuário com `PERMISSION_READ` (ou bypass Root) acessa o catálogo administrativo de permissions.
+2. O frontend consulta o catálogo somente para leitura, com pesquisa textual e paginação.
+3. Cada item exibe código, nome de apresentação, descrição e módulo técnico (`module_code`).
+4. Permissions nunca são criadas, editadas ou excluídas pela interface administrativa.
+
+### 6.2 Listagem e exclusão de roles
+
+1. Usuário com `ROLE_READ` (ou bypass Root) acessa a listagem administrativa de roles.
+2. O frontend consulta a listagem com:
+   - pesquisa textual opcional em código, nome e descrição;
+   - filtro por uma ou mais permissions com semântica AND (a role precisa possuir todas as
+     permissions selecionadas);
+   - paginação.
+3. A Role Root não aparece na listagem administrativa e não pode ser excluída por esse fluxo.
+4. Usuário com `ROLE_DELETE` (ou bypass Root) pode solicitar a exclusão de uma role da listagem.
+5. A exclusão é bloqueada quando existe usuário **ativo** vinculado à role.
+6. Vínculos apenas com usuários inativos podem ser removidos junto da exclusão da role; as
+   permissions do catálogo nunca são excluídas por essa operação.
+7. Permissions granulares previstas para a evolução do CRUD de roles:
+   - `ROLE_READ` — consultar a listagem;
+   - `ROLE_CREATE` — criar roles;
+   - `ROLE_UPDATE` — atualizar roles e seus vínculos;
+   - `ROLE_DELETE` — excluir roles.
+8. Criação e edição de roles, bem como a manutenção completa dos vínculos de permissions, fazem
+   parte do escopo do módulo, mas não são descritas neste fluxo como comportamento já entregue
+   pela listagem/exclusão.
+9. A autorização efetiva continua sendo por permission, não por role. A UI usa permissions apenas
+   para orientar a experiência; o backend autoriza cada operação.
 
 ---
 

@@ -24,7 +24,7 @@ O controle de acessos é feito em **3 níveis relacionados**:
 | **Role (Perfil)** | Um conjunto de permissões atribuídas ao usuário | Administrador, Usuário |
 | **Permission (Permissão)** | Autorizações individuais para executar ações específicas | Gerenciar usuários, Visualizar lista, Excluir registros |
 
-📌 O sistema **não** verifica acessos diretamente por perfis, mas sim por permissões.  
+📌 O sistema **não** verifica acessos diretamente por perfis, mas sim por permissões.
 📌 Cada role pode ter várias permissões. Um usuário pode possuir várias roles e recebe a união das
 permissões atribuídas a elas.
 
@@ -33,7 +33,7 @@ Exemplo simples:
 - Perfil **Administrador** → todas as permissões
 - Perfil **Usuário** → apenas visualizar sua área autenticada
 
-As permissões são definidas dentro do sistema e **não podem ser removidas**, apenas adicionadas em versões futuras.  
+As permissões são definidas dentro do sistema e **não podem ser removidas**, apenas adicionadas em versões futuras.
 Isso garante **padronização e segurança** entre diferentes projetos.
 
 ---
@@ -69,8 +69,9 @@ Isso garante **padronização e segurança** entre diferentes projetos.
   O acesso às funcionalidades do sistema deve ser autorizado exclusivamente por permissões registradas no sistema, não por roles diretamente.
 
 - **RN004 — Permissões independentes**
-  A exclusão de uma role não deve remover as permissões vinculadas a ela.
-  As permissões permanecem cadastradas no sistema para uso futuro.
+  A exclusão de uma role não deve remover as permissões do catálogo. As permissões permanecem
+  cadastradas no sistema para uso futuro. Vínculos da role com usuários inativos podem ser
+  removidos junto da exclusão; a exclusão é bloqueada enquanto houver usuário ativo vinculado.
 
 - **RN005 — Sem permissões diretas**
   Usuários não recebem permissões individuais. Toda permissão deve ser concedida exclusivamente através de roles.
@@ -79,7 +80,9 @@ Isso garante **padronização e segurança** entre diferentes projetos.
   Usuários com token expirado devem ser automaticamente redirecionados para autenticação.
 
 - **RN007 — Catálogo de permissões imutável**
-  Permissões cadastradas no sistema não podem ser removidas, apenas adicionadas em novas versões, garantindo padronização e segurança.
+  Permissões cadastradas no sistema não podem ser removidas, apenas adicionadas em novas versões,
+  garantindo padronização e segurança. Cada permission possui código técnico imutável, nome de
+  apresentação, descrição e identificador técnico de módulo (`module_code`).
 
 - **RN008 — Conta Root**
   O sistema deve nascer com uma conta root capaz de acessar e modificar qualquer recurso, independente das permissões atribuídas.
@@ -88,7 +91,8 @@ Isso garante **padronização e segurança** entre diferentes projetos.
   A role root deve conceder acesso total ao sistema, sem necessidade de vincular permissões. Ela é exclusiva para a conta root.
 
 - **RN010 — Isolamento da Role Root**
-  A role root não deve ser exibida ou manipulada por nenhum usuário que não seja root. Apenas o root pode criar ou modificar outro root.
+  A role root não deve ser exibida na listagem administrativa nem manipulada por nenhum usuário
+  que não seja root. Apenas o root pode criar ou modificar outro root.
 
 - **RN011 — Perfil do próprio usuário**
   O usuário pode consultar e alterar somente os próprios dados permitidos. Roles, permissions e
