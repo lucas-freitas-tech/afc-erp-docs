@@ -6,6 +6,12 @@ O AFC ERP é um sistema interno de gestão criado para centralizar e apoiar os p
 
 O sistema está em desenvolvimento e evolui de forma incremental. Cada nova capacidade é organizada em um módulo com responsabilidades próprias, integrado à mesma experiência de uso e à infraestrutura compartilhada do ERP.
 
+## Nome técnico e nome de apresentação
+
+**AFC ERP** é o nome técnico do projeto, utilizado nos repositórios, artefatos, arquitetura e documentação interna. Na interface apresentada aos usuários, o produto utiliza **AFC Placas** como nome de exibição, conforme a preferência da empresa.
+
+Essa decisão é intencional: **AFC Placas** identifica tanto a empresa atendida quanto a marca exibida na aplicação, enquanto **AFC ERP** continua identificando tecnicamente o sistema. Portanto, títulos de páginas, login e mensagens de boas-vindas podem utilizar “AFC Placas” sem exigir a renomeação dos projetos ou de seus identificadores técnicos.
+
 ## Problema que o produto resolve
 
 O AFC ERP busca oferecer um ponto central para a execução dos processos administrativos da AFC Placas. Essa centralização permite:
