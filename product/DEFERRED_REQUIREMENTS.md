@@ -31,13 +31,13 @@ deploy.
   de produção.
 - Todos os códigos de permissões utilizados pelo frontend devem existir no catálogo retornado pelo
   backend.
-- Toda permissão persistida deve possuir um identificador de módulo válido e não vazio.
-- O catálogo retornado pelo backend deve expor o identificador de módulo associado a cada
-  permissão.
+- Toda permissão persistida deve possuir `module_code` válido e não vazio, além de `name` e
+  `description`.
+- O catálogo retornado pelo backend deve expor o `module_code` associado a cada permissão.
 - Os identificadores de módulos utilizados pelas permissões do frontend devem corresponder aos
   módulos conhecidos pelo manifesto de navegação do frontend.
-- O teste deve validar conjuntamente o código da permissão e seu módulo, detectando permissões
-  cadastradas ou utilizadas no módulo incorreto.
+- O teste deve validar conjuntamente o código da permissão e seu `module_code`, detectando
+  permissões cadastradas ou utilizadas no módulo incorreto.
 - O backend pode possuir permissões que a versão atual do frontend ainda não utiliza.
 - Permissões ou módulos ainda desconhecidos pela versão atual do frontend não podem desaparecer
   silenciosamente da interface; deve existir um tratamento visual seguro para contratos novos.
