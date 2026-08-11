@@ -105,10 +105,15 @@ O logout aplica-se tanto à sessão normal quanto à sessão restrita por troca 
 
 ### 6.1 Catálogo de permissions
 
-1. Usuário com `PERMISSION_READ` (ou bypass Root) acessa o catálogo administrativo de permissions.
-2. O frontend consulta o catálogo somente para leitura, com pesquisa textual e paginação.
-3. Cada item exibe código, nome de apresentação, descrição e módulo técnico (`module_code`).
-4. Permissions nunca são criadas, editadas ou excluídas pela interface administrativa.
+1. Usuário com `PERMISSION_READ` (ou bypass Root) acessa a página administrativa do catálogo de
+   permissions. `ROLE_READ` não libera essa rota visual.
+2. O endpoint de consulta do catálogo autoriza `PERMISSION_READ`, `ROLE_READ` ou bypass Root:
+   - `PERMISSION_READ` (ou Root) sustenta a página administrativa do catálogo;
+   - `ROLE_READ` (ou Root) sustenta o uso auxiliar do mesmo endpoint pelo filtro da listagem de
+     roles (autocomplete de permissions).
+3. O frontend consulta o catálogo somente para leitura, com pesquisa textual e paginação.
+4. Cada item exibe código, nome de apresentação, descrição e módulo técnico (`module_code`).
+5. Permissions nunca são criadas, editadas ou excluídas pela interface administrativa.
 
 ### 6.2 Listagem e exclusão de roles
 
@@ -116,7 +121,8 @@ O logout aplica-se tanto à sessão normal quanto à sessão restrita por troca 
 2. O frontend consulta a listagem com:
    - pesquisa textual opcional em código, nome e descrição;
    - filtro por uma ou mais permissions com semântica AND (a role precisa possuir todas as
-     permissions selecionadas);
+     permissions selecionadas), alimentado pelo endpoint do catálogo autorizado também com
+     `ROLE_READ` (ou Root), sem conceder acesso à página administrativa de permissions;
    - paginação.
 3. A Role Root não aparece na listagem administrativa e não pode ser excluída por esse fluxo.
 4. Usuário com `ROLE_DELETE` (ou bypass Root) pode solicitar a exclusão de uma role da listagem.
