@@ -39,12 +39,12 @@ inválidas e sessões restritas não alcançam recursos indevidos.
 - falhas não expõem informações sensíveis;
 - recursos protegidos rejeitam sessão ausente, inválida ou insuficiente.
 
-## RBAC — Controle de acesso
+## RBAC — Autorização do sistema
 
 ### Objetivo
 
-Autorizar capacidades por permissions efetivas agrupadas em roles, incluindo o bypass e o
-isolamento reservados ao Root.
+Fornecer o mecanismo de autorização do ERP por permissions efetivas agrupadas em roles, incluindo
+o bypass e o isolamento reservados ao Root.
 
 ### Valor entregue
 
@@ -53,18 +53,16 @@ organização administrativa sem enfraquecer a segurança.
 
 ### Requisitos relacionados
 
-- Regras: RN002 a RN007, RN009 e RN014.
-- Funcionais: RF004 e RF009 a RF016.
+- Regras: RN002 a RN007 e RN014.
+- Funcionais: RF004.
 - Não funcionais: RNF003 e RNF006.
-- Fluxos: FL003 e FL008 a FL012.
+- Fluxos: FL003.
 
 ### Capacidades
 
 - resolução da união de permissions das roles;
 - autorização no backend por permission;
-- consulta do catálogo técnico imutável;
-- consulta, criação, atualização e exclusão condicionada de roles;
-- associação integral de permissions a roles;
+- definição do catálogo técnico imutável de permissions;
 - validação das dependências de leitura nas permissions de escrita;
 - bypass e isolamento do Root.
 
@@ -74,15 +72,14 @@ organização administrativa sem enfraquecer a segurança.
 - o frontend não substitui a decisão de autorização do backend;
 - o catálogo não aceita escrita administrativa;
 - a Role Root permanece fora dos fluxos comuns;
-- uma role com usuário ativo vinculado não pode ser excluída;
 - uma role não pode ser salva com permission de escrita sem o `READ` correspondente.
 
-## ADMIN — Administração de usuários e acessos
+## ADMIN — Gestão administrativa de acessos
 
 ### Objetivo
 
-Permitir que administradores autorizados mantenham usuários, seus estados, credenciais temporárias
-e vínculos com roles sem violar as proteções do Root e da própria conta.
+Permitir que administradores autorizados mantenham roles, suas permissions, usuários, estados,
+credenciais temporárias e vínculos de acesso sem violar as proteções do Root e da própria conta.
 
 ### Valor entregue
 
@@ -91,23 +88,27 @@ possível e compatível com a preservação futura de referências de negócio.
 
 ### Requisitos relacionados
 
-- Regras: RN001, RN003, RN004 e RN007 a RN014.
+- Regras: RN001, RN003 a RN005 e RN007 a RN014.
 - Funcionais: RF009 a RF024.
 - Não funcionais: RNF001 a RNF004 e RNF006.
 - Fluxos: FL008 a FL019.
 
 ### Capacidades
 
+- pesquisa e consulta administrativa de roles;
+- criação, atualização e exclusão condicionada de roles;
+- associação integral de permissions a roles;
 - pesquisa e consulta administrativa de usuários;
 - criação e atualização de usuário e de seus vínculos com roles;
 - bloqueio e desbloqueio;
 - exclusão física condicionada;
 - redefinição administrativa com senha temporária;
-- uso auxiliar dos catálogos de roles e permissions.
+- uso auxiliar do catálogo de permissions.
 
 ### Critérios de sucesso
 
 - a conta Root não aparece nem pode ser alterada nos fluxos comuns;
+- roles respeitam a unicidade, os vínculos e as dependências entre permissions;
 - o administrador não bloqueia nem exclui a própria conta;
 - o bloqueio preserva vínculos e impede novas sessões;
 - a exclusão respeita referências impeditivas;
