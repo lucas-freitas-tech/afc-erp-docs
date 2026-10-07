@@ -17,9 +17,9 @@ precisar ser desenvolvida sem afetar a `main`.
 
 Os nomes devem indicar o objetivo da alteração, por exemplo:
 
-- `feat/cadastro-clientes`
-- `fix/calculo-orcamento`
-- `refactor/autenticacao`
+- `feat/customer-registration`
+- `fix/budget-calculation`
+- `refactor/authentication`
 
 Para implementações criadas pelo handoff de planos, o nome também identifica a task e a subissue:
 
@@ -30,7 +30,7 @@ Para implementações criadas pelo handoff de planos, o nome também identifica 
 Exemplo:
 
 ```text
-feat/admin-03-issue-8-gestao-roles
+feat/admin-03-issue-8-role-management
 ```
 
 A skill somente prepara essa branch quando a `main` local estiver limpa e apontar para o mesmo
@@ -46,6 +46,9 @@ Os commits seguem um formato básico inspirado em Conventional Commits:
 tipo: descrição curta da alteração
 ```
 
+O tipo, o scope opcional e a descrição devem ser escritos em inglês, conforme a convenção de
+linguagem técnica do workspace.
+
 Tipos mais comuns:
 
 - `feat`: nova funcionalidade
@@ -58,9 +61,9 @@ Tipos mais comuns:
 Exemplos:
 
 ```text
-feat: adiciona cadastro de clientes
-fix: corrige cálculo do total do orçamento
-docs: documenta fluxo de autenticação
+feat: add customer registration
+fix: correct budget total calculation
+docs: document authentication flow
 ```
 
 ## Pull Requests
