@@ -72,10 +72,36 @@ Pull Requests são obrigatórios para implementações originadas dos planos que
 backend ou frontend. Cada PR deve resolver exatamente uma subissue do mesmo repositório e direcionar
 a branch padrão.
 
+Antes do primeiro push da implementação, os commits locais devem passar pela skill
+`afc-erp-code-review` no repositório correspondente. A revisão é individual por repositório e a
+aprovação vale somente para o commit analisado. Achados sugeridos pela IA dependem de triagem do
+desenvolvedor; um novo commit ou amend invalida a aprovação anterior.
+
+Quando autorizada a criar o PR, a skill publica a branch somente se ela ainda não estiver disponível
+no remoto. O push não é uma obrigação independente da revisão.
+
 O body do PR deve manter exatamente uma linha no formato:
 
 ```text
 Closes #<número-da-subissue>
+```
+
+O body segue este formato, sem evidências ou checklist final:
+
+```markdown
+## 📄 Descrição
+
+<por que a mudança é necessária e qual resultado entrega>
+
+## 🔗 História relacionada
+
+[ID-Task — Titulo](<URL-da-task-principal>)
+
+Closes #N
+
+## 🚀 Principais alterações
+
+- <capacidade ou resultado entregue>
 ```
 
 Ao integrar o PR na branch padrão, o GitHub fecha essa subissue como concluída. A automação então

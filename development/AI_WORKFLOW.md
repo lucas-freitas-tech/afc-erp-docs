@@ -91,21 +91,31 @@ integrações e migrations relevantes devem passar pelo fluxo rastreado abaixo.
    testes, lint, formatação, type check e build aplicáveis.
 4. O plano é removido depois da conclusão do escopo e das validações, mas antes de qualquer stage ou
    commit. O nome da branch preserva a referência necessária para o futuro PR.
-5. O desenvolvedor revisa os diffs e controla stage, commit e push.
+5. O desenvolvedor revisa os diffs e controla stage e commit. Depois dos commits locais, a branch
+   passa pela revisão pré-push descrita abaixo.
 
 #### 5. Revisar e integrar
 
-1. Cada implementação rastreada por subissue é entregue por um Pull Request para a branch padrão do
-   mesmo repositório.
-2. O body do PR contém exatamente `Closes #<número-da-subissue>` para que o merge conclua a unidade
-   técnica correspondente.
-3. O workflow valida o vínculo entre PR, subissue, task principal e GitHub Project. No plano atual do
+1. A skill `afc-erp-code-review` revisa um único repositório por execução, comparando os commits
+   locais da branch com `origin/main`. Um subagente independente, sem o contexto da implementação,
+   procura defeitos concretos de comportamento, segurança, dados, performance, contratos e testes.
+2. Achados da IA aguardam triagem do desenvolvedor. Quando solicitado, a skill os preserva em um
+   relatório temporário `CODE_REVIEW_FINDINGS_*.md`, que nunca entra em commit.
+3. Achados aceitos podem alimentar o modo de correção da `afc-erp-plan-handoff`. O Cursor executa e
+   remove esse novo plano, enquanto o relatório permanece para a revisão independente seguinte.
+4. A aprovação vale somente para o hash revisado. Novo commit ou amend exige nova revisão. Quando
+   todos os achados aceitos estiverem resolvidos, o relatório é arquivado fora do working tree.
+5. Após autorização, a skill cria o Pull Request. Ela publica a branch apenas quando isso for
+   necessário para criar o PR; publicar sem PR não é uma obrigação da revisão.
+6. Cada implementação rastreada por subissue é entregue por um Pull Request para a branch padrão do
+   mesmo repositório. O body apresenta descrição, história relacionada, principais alterações e
+   exatamente uma linha `Closes #<número-da-subissue>`.
+7. O workflow valida o vínculo entre PR, subissue, task principal e GitHub Project. No plano atual do
    GitHub, esse check é informativo e o desenvolvedor não deve realizar o merge quando ele falhar.
-4. Quando o risco justificar, a skill geral `multi-repo-integration-review` revisa as branches e os
+8. Quando o risco justificar, a skill geral `multi-repo-integration-review` revisa as branches e os
    contratos entre os repositórios antes do merge. Essa revisão é manual, somente leitura e não é um
    gate automatizado.
-5. Correções encontradas na revisão são implementadas e validadas antes da integração.
-6. Os PRs são integrados respeitando a ordem dos contratos, quando houver dependência entre eles.
+9. Os PRs são integrados respeitando a ordem dos contratos, quando houver dependência entre eles.
 
 #### 6. Aguardar validação
 
@@ -161,6 +171,8 @@ Deve-se preferir a solução mais simples que cubra os requisitos e riscos reais
 ## Controle das alterações
 
 - Ferramentas de IA não devem executar `git add`, `git commit` ou `git push` sem solicitação explícita do desenvolvedor na tarefa atual.
+- Executar a code review não autoriza implicitamente push ou criação de Pull Request. A publicação
+  deve ser pedida na mensagem atual ou confirmada depois do preview do PR.
 - Ao concluir a implementação, os arquivos devem permanecer no working tree para revisão.
 - Código gerado por IA segue os mesmos padrões de arquitetura, qualidade, testes e segurança
   aplicados ao restante do projeto.
