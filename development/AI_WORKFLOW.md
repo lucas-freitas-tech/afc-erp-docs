@@ -117,23 +117,31 @@ integrações e migrations relevantes devem passar pelo fluxo rastreado abaixo.
    gate automatizado.
 9. Os PRs são integrados respeitando a ordem dos contratos, quando houver dependência entre eles.
 
-#### 6. Aguardar validação
+#### 6. Testes de QA
 
 1. Cada merge na branch padrão fecha sua subissue como concluída pelo vínculo `Closes #N`.
 2. Enquanto alguma subissue estiver pendente, a task principal permanece em
    `🚧 Em Desenvolvimento`.
 3. Quando todas as subissues estiverem fechadas como concluídas, o workflow move a task para
-   `Aguardando validação`.
+   `Testes de QA`.
 4. Se uma subissue for reaberta, o workflow devolve a task para `🚧 Em Desenvolvimento`.
 5. Subissue fechada como não planejada não conta como implementação concluída.
 
 #### 7. Validar e encerrar
 
-1. O cliente, ou o desenvolvedor responsável pela validação nesta fase do produto, verifica a
+1. A skill `afc-erp-story-review` prepara cenários funcionais da história integrada para aprovação
+   do desenvolvedor antes de testar a aplicação no navegador e pela API. Os achados dependem de
+   triagem. Sem achados pendentes e com cobertura obrigatória aprovada, a skill move a história de
+   `Testes de QA` para `Em validação`. Com achados, pede a triagem do desenvolvedor e mantém o card
+   em QA enquanto ela estiver pendente. Ao aceitar algum achado que exige correção, a skill retorna
+   automaticamente para `🚧 Em Desenvolvimento`, sem pedir outra autorização para mover o card.
+   Resultado inconclusivo ou bloqueio de ambiente mantém o status. A skill não substitui o aceite
+   funcional.
+2. O cliente, ou o desenvolvedor responsável pela validação nesta fase do produto, verifica a
    história completa e seus critérios de aceitação.
-2. A automação não interpreta merge como aceite funcional e nunca conclui a task principal.
-3. Depois do aceite, o desenvolvedor move manualmente a task para `Concluído` e fecha sua issue no
-   `afc-erp-docs`.
+3. A automação não interpreta merge como aceite funcional e nunca conclui a task principal.
+4. Depois do aceite em `Em validação`, o desenvolvedor move manualmente a task para `Concluído` e
+   fecha sua issue no `afc-erp-docs`.
 
 O tratamento formal de ajustes solicitados durante a validação não possui uma skill especializada
 neste momento e permanece fora deste fluxo documentado.

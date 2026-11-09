@@ -107,14 +107,21 @@ Closes #N
 Ao integrar o PR na branch padrão, o GitHub fecha essa subissue como concluída. A automação então
 recalcula todas as subissues da task pai:
 
-- todas concluídas: move a task de `🚧 Em Desenvolvimento` para `Aguardando validação`;
+- todas concluídas: move a task de `🚧 Em Desenvolvimento` para `Testes de QA`;
 - alguma pendente ou reaberta: mantém ou devolve a task para `🚧 Em Desenvolvimento`.
 
 Fechar um PR sem merge não conclui a subissue. Fechar uma subissue como `not planned` também não
 libera a task pai. A task pai nunca é fechada automaticamente.
 
-`Aguardando validação` significa que a implementação técnica foi integrada, mas ainda não recebeu o
-aceite funcional. O cliente, ou o desenvolvedor responsável pela validação nesta fase do produto,
+`Testes de QA` significa que a implementação técnica foi integrada e aguarda os testes funcionais
+da história. A skill `afc-erp-story-review` move automaticamente para `Em validação` quando a execução
+obrigatória passa sem achados pendentes. Com achados, mantém o card em QA até a triagem do
+desenvolvedor. Se algum achado que exige correção for aceito, retorna automaticamente para
+`🚧 Em Desenvolvimento`, sem confirmação adicional de transição. Resultado inconclusivo ou bloqueio
+do ambiente não muda o status. A transição automática parte somente de `Testes de QA`.
+
+`Em validação` é a etapa seguinte, reservada ao aceite funcional.
+O cliente, ou o desenvolvedor responsável pela validação nesta fase do produto,
 verifica a história e seus critérios de aceitação. Depois do aceite, o desenvolvedor move
 manualmente a task para `Concluído` e fecha sua issue principal no `afc-erp-docs`.
 
